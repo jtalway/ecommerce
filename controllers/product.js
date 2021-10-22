@@ -7,7 +7,9 @@ const {errorHandler} = require("../helpers/dbErrorHandler");
 // FIND PRODUCT
 exports.productById = (req, res, next, id) => {
 	// access Product model
-	Product.findById(id).exec((err, product) => {
+	Product.findById(id)
+		.populate("category")
+		.exec((err, product) => {
 		// error or no product
 		if(err || !product) {
 			return res.status(400).json({
@@ -120,29 +122,6 @@ exports.update = (req, res) => {
 		if(err) {
 			return res.status(400).json({
 				error: "Image could not be uploaded"
-			});
-		}
-
-		// grab all fields
-		const {
-			name, 
-			description, 
-			price, 
-			category, 
-			quantity, 
-			shipping
-		} = fields;
-
-		if (
-			!name || 
-			!description || 
-			!price || 
-			!category || 
-			!quantity || 
-			!shipping
-		) {
-			return res.status(400).json({
-				error: "All fields are required"
 			});
 		}
 
@@ -299,4 +278,52 @@ exports.photo = (req, res, next) => {
 		return res.send(req.product.photo.data);
 	}
 	next();
+};
+
+
+exports.listSearch = (req, res) => {
+    // create query object to hold search value and category value
+    const query = {};
+    // assign search value to query.name
+    if (req.query.search) {
+        query.name = { $regex: req.query.search, $options: "i" };
+        // assign category value to query.category
+        if (req.query.category && req.query.category != "All") {
+            query.category = req.query.category;
+        }
+        // find the product based on query object with 2 properties
+        // search and category
+        Product.find(query, (err, products) => {
+            if (err) {
+                return res.status(400).json({
+                    error: errorHandler(err)
+                });
+            }
+            res.json(products);
+        }).select("-photo");
+    }
+};
+
+// Adjust Sold and Quantity based on orders
+exports.decreaseQuantity = (req, res, next) => {
+	// map each product we are getting in the order
+	let bulkOps = req.body.order.products.map((item) => {
+		return {
+			updateOne: {
+				// limit to products
+				filter: {_id: item._id},
+				// increment sold, decrement quantity
+				update: {$inc: {quantity:-item.count, sold: +item.count}}
+			}
+		};
+	});
+	// update the product
+	Product.bulkWrite(bulkOps, {}, (error, products) => {
+		if (error) {
+			return res.status(400).json({
+				error: "Could not update product"
+			});
+		}
+		next();
+	});
 };

@@ -58,14 +58,14 @@ exports.signout = (req, res) => {
 	res.json({message: "Signout successful."});
 };
 
-
+// Require Signin
 exports.requireSignin = expressJwt({
 	secret: process.env.JWT_SECRET,
 	algorithms: ["HS256"],
 	userProperty: "auth"
 });
 
-
+// Is User Authorized?
 exports.isAuth = (req, res, next) => {
 	// get profile if user is authenticated (signed in userProperty)
 	let user = req.profile && req.auth && req.profile._id.toString() === req.auth._id.toString();
@@ -78,6 +78,7 @@ exports.isAuth = (req, res, next) => {
 	next();
 };
 
+// Is User Admin?
 exports.isAdmin = (req, res, next) => {
 	if(req.profile.role !==1) {
 		return res.status(403).json({
