@@ -20,7 +20,7 @@ const app = express();
 
 // db
 mongoose.connect(
-	process.env.MONGO_URI,
+	process.env.DATABASE,
 	{useNewUrlParser: true, useUnifiedTopology: true}
 )
 .then(() => console.log("[+] Database connected")) // promise
