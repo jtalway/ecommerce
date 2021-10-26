@@ -49,7 +49,12 @@ exports.create = (req, res) => {
 			price, 
 			category, 
 			quantity, 
-			shipping
+			shipping,
+			condition,
+			rarity,
+			expansion,
+			maker,
+			released
 		} = fields;
 
 		if (

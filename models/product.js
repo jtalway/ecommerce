@@ -40,7 +40,33 @@ const productSchema = new mongoose.Schema(
 		shipping: {
 			required: false,
 			type: Boolean
+		},
+		condition: {
+			type: String,
+			trim: true,
+			maxlength: 100
+		},
+		rarity: {
+			type: String,
+			trim: true,
+			maxlength: 32
+		},
+		expansion: {
+			type: String,
+			trim: true,
+			maxlength: 100
+		},
+		maker: {
+			type: String,
+			trim: true,
+			maxlength: 100
+		},
+		released: {
+			type: String,
+			trim: true,
+			maxlength: 32
 		}
+
 	}, 
 	{timestamps: true}
 );
